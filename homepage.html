@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title>Memory Game</title>
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+</head>
+
+<body>
+  <div class="container py-5">
+    <h1 class="text-center mb-4">Memory Game</h1>
+
+    <form id="varieOpzioni">
+      <div class="form-group">
+        <label for="username">Username:</label>
+        <input type="text" id="name" name="username" class="form-control">
+      </div>
+      <div class="form-group">
+        <label for="nRighe">Game ID:</label>
+        <input type="text" id="gameID" name="nRighe" class="form-control">
+      </div>
+      <button type="button" onclick="createMatch()" class="btn btn-primary btn-block">Create Game</button>
+      <div id="printId"></div>
+      <br>
+      <button type="button" onclick="joinMatch()" class="btn btn-primary btn-block">Join an existing game</button>
+      <button type="button" onclick="getAvailableGames()" class="btn btn-primary btn-block">Get Available Games</button>
+      <button type="button" onclick="clearGameIDs()" class="btn btn-primary btn-block">Clear Game IDs</button>
+      <button type="button" class="btn btn-primary btn-block" onclick="window.location.href='index.html?id + id'">Go to the game</button>
+    </form>
+    <div id="printGames" style="text-align: center;"></div>
+  </div>
+  <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+  <script>const game = document.getElementById('game');</script>
+  <script>
+    function clearGameIDs() {
+    const printGamesElement = document.getElementById("printGames");
+    printGamesElement.innerHTML = "";
+    }
+    let gameID = localStorage.getItem("gameID");
+    async function createMatch() {
+      const myHeaders = new Headers();
+      myHeaders.append("Authorization", "Basic NElFOlRpcm9uaQ==");
+      const requestOptions = {
+        method: "POST",
+        headers: myHeaders,
+        redirect: "follow"
+      };
+
+      const risultato = await fetch("https://classe5ID.altervista.org/games/partita/masserini_memory", requestOptions);
+      const json = await risultato.json();
+      const id = await json.data.id;
+
+      document.getElementById("printId").innerText = "Match ID: " + id;
+      localStorage.setItem("gameID", id);
+    }
+
+    function joinMatch() {
+      const name = document.getElementById("name").value;
+      const gameID = document.getElementById("gameID").value;
+
+      const myHeaders = new Headers();
+      myHeaders.append("Authorization", "Basic NElFOlRpcm9uaQ==");
+
+      const requestOptions = {
+        method: "POST",
+        headers: myHeaders,
+        redirect: "follow"
+      };
+
+      fetch(`https://classe5ID.altervista.org/games/join/${gameID}/${name}`, requestOptions);
+      window.location.href = 'index.html?id=' + gameID;
+    }
+
+    async function getAvailableGames() {
+      const myHeaders = new Headers();
+      myHeaders.append("Authorization", "Basic NElFOlRpcm9uaQ==");
+      const response = await fetch("https://classe5ID.altervista.org/games/partitaN/3", {
+        method: "GET",
+        headers: myHeaders,
+        redirect: "follow"
+      });
+      const json = await response.json();
+      console.log(json);
+      if (json.data.length > 0) {
+        for (let i = 0; i < json.data.length; i++) {
+          const game = json.data[i];
+          if (game.PLAYER1 === "masserini_memory") {
+            document.getElementById("printGames").innerText += `Game ID: ${game.ID}\n`;
+          }
+        }
+      }
+    }
+  </script>
+</body>
+
+</html>
